@@ -12,15 +12,40 @@
             margin: 0;
             padding: 20px;
             user-select: none;
+            color: #333;
         }
         h1 {
             color: #ff8c00;
-            font-size: 2rem;
-            margin-bottom: 10px;
+            font-size: 1.8rem;
+            margin: 5px 0 15px 0;
         }
+
+        /* スターエリア */
+        .stars-container {
+            background-color: white;
+            border-radius: 16px;
+            padding: 15px 20px;
+            display: inline-block;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+            margin-bottom: 20px;
+        }
+        .stars-label {
+            font-size: 1rem;
+            font-weight: bold;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        .star-icons {
+            font-size: 2rem;
+            letter-spacing: 4px;
+        }
+        .star-gold { color: #fbc02d; text-shadow: 0 2px 4px rgba(251, 192, 45, 0.4); }
+        .star-gray { color: #e0e0e0; }
+
+        /* コントロール・ボタン */
         .controls {
-            margin: 20px 0;
-            height: 50px;
+            margin: 15px 0;
+            min-height: 50px;
         }
         button {
             font-size: 1.2rem;
@@ -32,35 +57,42 @@
             box-shadow: 0 4px 8px rgba(0,0,0,0.15);
             transition: transform 0.1s;
         }
-        button:active {
-            transform: scale(0.96);
+        button:active { transform: scale(0.96); }
+        .btn-start { background-color: #4CAF50; color: white; }
+        .btn-replay { background-color: #ff9800; color: white; }
+        .btn-reset {
+            background-color: #fff;
+            color: #999;
+            border: 2px solid #ddd;
+            font-size: 0.85rem;
+            padding: 6px 14px;
+            box-shadow: none;
+            margin-top: 15px;
         }
-        #startBtn {
-            background-color: #4CAF50;
-            color: white;
+
+        /* 問題画面 */
+        .progress-bar {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #ff8c00;
+            margin-bottom: 10px;
         }
-        #replayBtn {
-            background-color: #ff9800;
-            color: white;
-        }
-        /* 左右に大きく2択を並べる */
         .choices-container {
             display: flex;
             justify-content: center;
-            gap: 30px;
-            margin-top: 30px;
+            gap: 25px;
+            margin-top: 20px;
         }
         .choice-card {
             background-color: white;
             border: 5px solid #eee;
             border-radius: 20px;
-            padding: 15px;
-            cursor: pointer;
-            width: 200px;
-            height: 200px;
+            width: 170px;
+            height: 170px;
             display: flex;
             align-items: center;
             justify-content: center;
+            cursor: pointer;
             box-shadow: 0 6px 12px rgba(0,0,0,0.08);
             transition: transform 0.15s, border-color 0.15s;
         }
@@ -69,95 +101,275 @@
             border-color: #ffa726;
         }
         .choice-card img {
-            width: 170px;
-            height: 170px;
+            width: 130px;
+            height: 130px;
             object-fit: contain;
             pointer-events: none;
         }
+        .choice-card .emoji-icon {
+            font-size: 80px;
+            line-height: 1;
+            pointer-events: none;
+        }
+
+        /* フィードバック */
         #feedback {
-            font-size: 2.2rem;
+            font-size: 2rem;
             font-weight: bold;
-            margin-top: 30px;
+            margin-top: 25px;
             height: 48px;
         }
         .correct { color: #e91e63; }
         .incorrect { color: #2196f3; }
+
+        /* リザルトモーダル */
+        .result-box {
+            background: white;
+            padding: 25px;
+            border-radius: 20px;
+            max-width: 360px;
+            margin: 20px auto;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+        }
+        .clear-banner {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #e91e63;
+            background: #ffebee;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
     </style>
 </head>
 <body>
 
     <h1>どっちかな？ おとあてゲーム</h1>
-    
-    <div class="controls">
-        <button id="startBtn" onclick="startGame()">▶️ スタート</button>
-        <button id="replayBtn" onclick="replayAudio()" style="display: none;">🔊 もういちどきく</button>
+
+    <!-- 10スター表示エリア -->
+    <div class="stars-container">
+        <div class="stars-label">きょうのスター (<span id="starCountText">0</span> / 10)</div>
+        <div class="star-icons" id="starIconsArea"></div>
     </div>
 
-    <!-- 左右の2択エリア -->
-    <div id="choices" class="choices-container"></div>
-    <div id="feedback"></div>
+    <!-- トップ画面コンテナ -->
+    <div id="homeScreen">
+        <div id="clearMessage" class="clear-banner" style="display: none;">
+            🎉 たいへんよくできました！ きょうはクリア！
+        </div>
+        <div class="controls">
+            <button class="btn-start" onclick="startRound()">▶️ 8もん チャレンジ！</button>
+        </div>
+        <div>
+            <button class="btn-reset" onclick="resetStarsManually()">🗑️ スターをリセット</button>
+        </div>
+    </div>
+
+    <!-- ゲームプレイ画面コンテナ -->
+    <div id="gameScreen" style="display: none;">
+        <div class="progress-bar" id="questionProgress">第 1 問 / 8 問</div>
+        <div class="controls">
+            <button class="btn-replay" onclick="replayAudio()">🔊 もういちどきく</button>
+        </div>
+        <div id="choices" class="choices-container"></div>
+        <div id="feedback"></div>
+    </div>
+
+    <!-- 8問終了画面コンテナ -->
+    <div id="roundResultScreen" style="display: none;">
+        <div class="result-box">
+            <h2>チャレンジ おわり！</h2>
+            <p id="roundSummary" style="font-size: 1.2rem;"></p>
+            <p id="roundScoreDetail" style="font-weight: bold; color: #ff8c00; font-size: 1.3rem;"></p>
+            <button class="btn-start" onclick="backToHome()">おわる</button>
+        </div>
+    </div>
 
     <script>
-        // 「カ行 vs タ行」のミニマルペア定義
+        // 全10ペア（画像対応 ＆ 絵文字対応）
         const wordPairs = [
+            // 画像ペア（ローカルのimgフォルダを使用）
             {
                 name: 'か・た',
-                ka: { id: 'ika',   text: 'いか', image: './img/ika.jpg' },
-                ta: { id: 'ita',   text: 'いた', image: './img/ita.jpg' }
+                ka: { id: 'ika',   text: 'いか', img: './img/ika.jpg' },
+                ta: { id: 'ita',   text: 'いた', img: './img/ita.jpg' }
             },
             {
                 name: 'こ・と',
-                ka: { id: 'hako',  text: 'はこ', image: './img/hako.jpg' },
-                ta: { id: 'hato',  text: 'はと', image: './img/hato.jpg' }
+                ka: { id: 'hako',  text: 'はこ', img: './img/hako.jpg' },
+                ta: { id: 'hato',  text: 'はと', img: './img/hato.jpg' }
             },
             {
                 name: 'く・つ',
-                ka: { id: 'kutsu', text: 'くつ', image: './img/kutsu.jpg' },
-                ta: { id: 'tsutsu',text: 'つつ', image: './img/tsutsu.jpg' }
+                ka: { id: 'kutsu', text: 'くつ', img: './img/kutsu.jpg' },
+                ta: { id: 'tsutsu',text: 'つつ', img: './img/tsutsu.jpg' }
+            },
+            // 絵文字アイコンペア（画像ファイル不要で即動作）
+            {
+                name: 'か・た（しか・した）',
+                ka: { id: 'shika', text: 'しか', emoji: '🦌' },
+                ta: { id: 'shita', text: 'した', emoji: '👅' }
+            },
+            {
+                name: 'き・ち（きず・ちず）',
+                ka: { id: 'kizu',  text: 'きず', emoji: '🩹' },
+                ta: { id: 'chizu', text: 'ちず', emoji: '🗺️' }
+            },
+            {
+                name: 'き・ち（つき・つち）',
+                ka: { id: 'tsuki', text: 'つき', emoji: '🌙' },
+                ta: { id: 'tsuchi',text: 'つち', emoji: '🪴' }
+            },
+            {
+                name: 'く・つ（くり・つり）',
+                ka: { id: 'kuri',  text: 'くり', emoji: '🌰' },
+                ta: { id: 'tsuri', text: 'つり', emoji: '🎣' }
+            },
+            {
+                name: 'け・て（け・て）',
+                ka: { id: 'ke',    text: 'け',   emoji: '🦱' },
+                ta: { id: 'te',    text: 'て',   emoji: '✋' }
+            },
+            {
+                name: 'け・て（たけ・たて）',
+                ka: { id: 'take',  text: 'たけ', emoji: '🎋' },
+                ta: { id: 'tate',  text: 'たて', emoji: '🛡️' }
+            },
+            {
+                name: 'こ・と（こおり・とおり）',
+                ka: { id: 'koori', text: 'こおり', emoji: '🧊' },
+                ta: { id: 'toori', text: 'とおり', emoji: '🛣️' }
             }
         ];
 
+        const TOTAL_QUESTIONS_PER_ROUND = 8;
+        const TARGET_STARS = 10;
+        const STORAGE_KEY_STARS = 'sound_game_stars';
+        const STORAGE_KEY_TIME  = 'sound_game_last_time';
+
+        let currentRoundQuestions = [];
+        let questionIndex = 0;
+        let roundCorrect = 0;
+        let roundIncorrect = 0;
         let currentTarget = null;
         let isAnswering = false;
 
-        function startGame() {
-            document.getElementById('startBtn').style.display = 'none';
-            document.getElementById('replayBtn').style.display = 'inline-block';
-            nextQuestion();
+        // 起動時に保存データを確認（24時間経過チェック）
+        window.onload = function() {
+            check24HourReset();
+            renderStars();
+        };
+
+        function getStoredStars() {
+            return parseInt(localStorage.getItem(STORAGE_KEY_STARS) || '0', 10);
         }
 
-        function nextQuestion() {
+        function setStoredStars(val) {
+            localStorage.setItem(STORAGE_KEY_STARS, val);
+            localStorage.setItem(STORAGE_KEY_TIME, Date.now());
+            renderStars();
+        }
+
+        // 24時間リセット判定
+        function check24HourReset() {
+            const lastTime = parseInt(localStorage.getItem(STORAGE_KEY_TIME) || '0', 10);
+            if (!lastTime) return;
+
+            const now = Date.now();
+            const hoursPassed = (now - lastTime) / (1000 * 60 * 60);
+
+            if (hoursPassed >= 24) {
+                setStoredStars(0);
+            }
+        }
+
+        // スター画面描画
+        function renderStars() {
+            const stars = getStoredStars();
+            document.getElementById('starCountText').textContent = stars;
+
+            let html = '';
+            for (let i = 1; i <= TARGET_STARS; i++) {
+                if (i <= stars) {
+                    html += '<span class="star-gold">★</span>';
+                } else {
+                    html += '<span class="star-gray">☆</span>';
+                }
+            }
+            document.getElementById('starIconsArea').innerHTML = html;
+
+            // 10点達成バナー
+            const clearBanner = document.getElementById('clearMessage');
+            if (stars >= TARGET_STARS) {
+                clearBanner.style.display = 'block';
+            } else {
+                clearBanner.style.display = 'none';
+            }
+        }
+
+        // 手動リセット
+        function resetStarsManually() {
+            if (confirm('スターを 0 にリセットしますか？')) {
+                setStoredStars(0);
+            }
+        }
+
+        // チャレンジ開始
+        function startRound() {
+            document.getElementById('homeScreen').style.display = 'none';
+            document.getElementById('roundResultScreen').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'block';
+
+            // 10組からランダムに8組を選んで問題リストを作成
+            const shuffledPairs = [...wordPairs].sort(() => Math.random() - 0.5);
+            currentRoundQuestions = shuffledPairs.slice(0, TOTAL_QUESTIONS_PER_ROUND);
+
+            questionIndex = 0;
+            roundCorrect = 0;
+            roundIncorrect = 0;
+
+            loadQuestion();
+        }
+
+        function loadQuestion() {
             isAnswering = true;
             document.getElementById('feedback').textContent = '';
             document.getElementById('feedback').className = '';
+            document.getElementById('questionProgress').textContent = `第 ${questionIndex + 1} 問 / ${TOTAL_QUESTIONS_PER_ROUND} 問`;
 
-            // 1. 3組のペアからランダムで1組選択
-            const pair = wordPairs[Math.floor(Math.random() * wordPairs.length)];
+            const pair = currentRoundQuestions[questionIndex];
 
-            // 2. カ行側かタ行側か、どちらを正解（再生音）にするか決定
+            // 正解音（カ行かタ行か）を決定
             currentTarget = Math.random() < 0.5 ? pair.ka : pair.ta;
 
-            // 3. 左右の配置をシャッフル（位置による当てずっぽうを防止）
+            // 左右ランダム配置
             const choices = Math.random() < 0.5 ? [pair.ka, pair.ta] : [pair.ta, pair.ka];
 
-            // 4. 画面に2枚のカードを描画
             const container = document.getElementById('choices');
             container.innerHTML = '';
 
             choices.forEach(item => {
                 const card = document.createElement('div');
                 card.className = 'choice-card';
-                
-                const img = document.createElement('img');
-                img.src = item.image;
-                img.alt = item.text;
 
-                card.appendChild(img);
-                card.onclick = () => selectChoice(item.id);
+                // 画像か絵文字かで出し分け
+                if (item.img) {
+                    const img = document.createElement('img');
+                    img.src = item.img;
+                    img.alt = item.text;
+                    card.appendChild(img);
+                } else {
+                    const span = document.createElement('span');
+                    span.className = 'emoji-icon';
+                    span.textContent = item.emoji;
+                    card.appendChild(span);
+                }
+
+                card.onclick = () => handleChoice(item.id);
                 container.appendChild(card);
             });
 
-            // 5. 単語を読み上げ
+            // 音声再生
             speak(currentTarget.text);
         }
 
@@ -176,26 +388,65 @@
             }
         }
 
-        function selectChoice(selectedId) {
+        function handleChoice(selectedId) {
             if (!isAnswering) return;
+            isAnswering = false;
 
             const feedback = document.getElementById('feedback');
 
             if (selectedId === currentTarget.id) {
-                // 正解
-                isAnswering = false;
-                feedback.textContent = '⭕️ せいかい！';
+                // 正解 (+1点)
+                roundCorrect++;
+                feedback.textContent = '⭕️ せいかい！ (+1)';
                 feedback.className = 'correct';
-                
                 speak('せいかい！');
-                setTimeout(nextQuestion, 1800);
             } else {
-                // 不正解
-                feedback.textContent = '❌ もういちどきいてみてね';
+                // 不正解 (-1点)
+                roundIncorrect++;
+                feedback.textContent = '❌ ちがうよ (-1)';
                 feedback.className = 'incorrect';
-                
-                setTimeout(() => speak(currentTarget.text), 600);
+                speak('ざんねん！');
             }
+
+            // 1.2秒後に自動で次へ
+            setTimeout(() => {
+                questionIndex++;
+                if (questionIndex < TOTAL_QUESTIONS_PER_ROUND) {
+                    loadQuestion();
+                } else {
+                    finishRound();
+                }
+            }, 1200);
+        }
+
+        // 8問終了時の集計
+        function finishRound() {
+            document.getElementById('gameScreen').style.display = 'none';
+            document.getElementById('roundResultScreen').style.display = 'block';
+
+            // 正解 - 不正解 の純加算点
+            const roundScore = roundCorrect - roundIncorrect;
+            const netAdd = Math.max(0, roundScore); // マイナスの場合は加算0（スターは減らさない）
+
+            const currentStars = getStoredStars();
+            const newStars = Math.min(TARGET_STARS, currentStars + netAdd);
+            setStoredStars(newStars);
+
+            document.getElementById('roundSummary').textContent = 
+                `せいかい: ${roundCorrect} 問 ／ まちがい: ${roundIncorrect} 問`;
+
+            if (netAdd > 0) {
+                document.getElementById('roundScoreDetail').textContent = `スター ＋${netAdd} 個 ゲット！`;
+                speak('よくがんばりました！');
+            } else {
+                document.getElementById('roundScoreDetail').textContent = `今回は スター ＋0 個。つぎもがんばろう！`;
+            }
+        }
+
+        function backToHome() {
+            document.getElementById('roundResultScreen').style.display = 'none';
+            document.getElementById('homeScreen').style.display = 'block';
+            renderStars();
         }
     </script>
 </body>
