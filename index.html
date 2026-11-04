@@ -3,71 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>おとあてゲーム</title>
+    <title>どっちかな？ おとあてゲーム</title>
     <style>
         body {
             font-family: 'Hiragino Maru Gothic ProN', 'Rounded M+ 1c', sans-serif;
             text-align: center;
-            background-color: #f9f9f9;
+            background-color: #fdfbf7;
             margin: 0;
             padding: 20px;
+            user-select: none;
         }
         h1 {
             color: #ff8c00;
+            font-size: 2rem;
+            margin-bottom: 10px;
         }
         .controls {
             margin: 20px 0;
+            height: 50px;
         }
         button {
             font-size: 1.2rem;
-            padding: 10px 20px;
-            background-color: #4CAF50;
-            color: white;
+            font-weight: bold;
+            padding: 12px 28px;
             border: none;
-            border-radius: 8px;
+            border-radius: 30px;
             cursor: pointer;
-            margin: 5px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            transition: transform 0.1s;
         }
         button:active {
-            transform: translateY(2px);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transform: scale(0.96);
         }
-        .options-container {
+        #startBtn {
+            background-color: #4CAF50;
+            color: white;
+        }
+        #replayBtn {
+            background-color: #ff9800;
+            color: white;
+        }
+        /* 左右に大きく2択を並べる */
+        .choices-container {
             display: flex;
             justify-content: center;
-            gap: 20px;
+            gap: 30px;
             margin-top: 30px;
-            flex-wrap: wrap;
         }
-        .option-btn {
+        .choice-card {
             background-color: white;
-            border: 4px solid #ddd;
-            border-radius: 12px;
-            padding: 10px;
+            border: 5px solid #eee;
+            border-radius: 20px;
+            padding: 15px;
             cursor: pointer;
-            transition: transform 0.2s, border-color 0.2s;
-            width: 140px;
-            height: 140px;
+            width: 200px;
+            height: 200px;
             display: flex;
             align-items: center;
             justify-content: center;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.08);
+            transition: transform 0.15s, border-color 0.15s;
         }
-        .option-btn:hover {
-            transform: scale(1.05);
-            border-color: #4CAF50;
+        .choice-card:hover {
+            transform: translateY(-4px);
+            border-color: #ffa726;
         }
-        .option-btn img {
-            width: 120px;
-            height: 120px;
+        .choice-card img {
+            width: 170px;
+            height: 170px;
             object-fit: contain;
-            pointer-events: none; /* 画像への直接クリックを防ぐ */
+            pointer-events: none;
         }
-        #result {
-            font-size: 2rem;
+        #feedback {
+            font-size: 2.2rem;
             font-weight: bold;
             margin-top: 30px;
-            height: 40px;
+            height: 48px;
         }
         .correct { color: #e91e63; }
         .incorrect { color: #2196f3; }
@@ -79,73 +90,83 @@
     
     <div class="controls">
         <button id="startBtn" onclick="startGame()">▶️ スタート</button>
-        <button id="replayBtn" onclick="replayAudio()" style="display: none; background-color: #ff9800;">🔊 もういちどきく</button>
+        <button id="replayBtn" onclick="replayAudio()" style="display: none;">🔊 もういちどきく</button>
     </div>
 
-    <div id="options" class="options-container"></div>
-    <div id="result"></div>
+    <!-- 左右の2択エリア -->
+    <div id="choices" class="choices-container"></div>
+    <div id="feedback"></div>
 
     <script>
-        // 画像と音声のデータを定義
-        const wordData = [
-            { id: 'ita',    image: './img/ita.jpg',    text: 'いた' },
-            { id: 'hato',   image: './img/hato.jpg',   text: 'はと' },
-            { id: 'tsutsu', image: './img/tsutsu.jpg', text: 'つつ' }
+        // 「カ行 vs タ行」のミニマルペア定義
+        const wordPairs = [
+            {
+                name: 'か・た',
+                ka: { id: 'ika',   text: 'いか', image: './img/ika.jpg' },
+                ta: { id: 'ita',   text: 'いた', image: './img/ita.jpg' }
+            },
+            {
+                name: 'こ・と',
+                ka: { id: 'hako',  text: 'はこ', image: './img/hako.jpg' },
+                ta: { id: 'hato',  text: 'はと', image: './img/hato.jpg' }
+            },
+            {
+                name: 'く・つ',
+                ka: { id: 'kutsu', text: 'くつ', image: './img/kutsu.jpg' },
+                ta: { id: 'tsutsu',text: 'つつ', image: './img/tsutsu.jpg' }
+            }
         ];
 
         let currentTarget = null;
-        let isPlaying = false;
+        let isAnswering = false;
 
         function startGame() {
             document.getElementById('startBtn').style.display = 'none';
             document.getElementById('replayBtn').style.display = 'inline-block';
-            isPlaying = true;
             nextQuestion();
         }
 
         function nextQuestion() {
-            if (!isPlaying) return;
+            isAnswering = true;
+            document.getElementById('feedback').textContent = '';
+            document.getElementById('feedback').className = '';
 
-            // ランダムに正解を1つ選ぶ
-            const randomIndex = Math.floor(Math.random() * wordData.length);
-            currentTarget = wordData[randomIndex];
+            // 1. 3組のペアからランダムで1組選択
+            const pair = wordPairs[Math.floor(Math.random() * wordPairs.length)];
 
-            document.getElementById('result').textContent = '';
-            document.getElementById('result').className = '';
+            // 2. カ行側かタ行側か、どちらを正解（再生音）にするか決定
+            currentTarget = Math.random() < 0.5 ? pair.ka : pair.ta;
 
-            // 選択肢の描画
-            const optionsContainer = document.getElementById('options');
-            optionsContainer.innerHTML = '';
+            // 3. 左右の配置をシャッフル（位置による当てずっぽうを防止）
+            const choices = Math.random() < 0.5 ? [pair.ka, pair.ta] : [pair.ta, pair.ka];
 
-            // 常に3つの選択肢を固定順で表示する
-            wordData.forEach(word => {
-                const btn = document.createElement('div');
-                btn.className = 'option-btn';
+            // 4. 画面に2枚のカードを描画
+            const container = document.getElementById('choices');
+            container.innerHTML = '';
+
+            choices.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'choice-card';
                 
                 const img = document.createElement('img');
-                img.src = word.image;
-                img.alt = word.text;
-                
-                btn.appendChild(img);
-                
-                // クリック時の判定処理
-                btn.onclick = () => checkAnswer(word.id);
-                
-                optionsContainer.appendChild(btn);
+                img.src = item.image;
+                img.alt = item.text;
+
+                card.appendChild(img);
+                card.onclick = () => selectChoice(item.id);
+                container.appendChild(card);
             });
 
-            // 音声を再生
+            // 5. 単語を読み上げ
             speak(currentTarget.text);
         }
 
         function speak(text) {
-            // 前の音声が鳴っていたらキャンセル
             speechSynthesis.cancel();
-            
             const uttr = new SpeechSynthesisUtterance(text);
             uttr.lang = 'ja-JP';
-            uttr.rate = 0.8;  // 子供が聞き取りやすいように少しゆっくり
-            uttr.pitch = 1.2; // 少し高めの声
+            uttr.rate = 0.8;
+            uttr.pitch = 1.1;
             speechSynthesis.speak(uttr);
         }
 
@@ -155,25 +176,27 @@
             }
         }
 
-        function checkAnswer(selectedId) {
-            const resultDiv = document.getElementById('result');
-            
+        function selectChoice(selectedId) {
+            if (!isAnswering) return;
+
+            const feedback = document.getElementById('feedback');
+
             if (selectedId === currentTarget.id) {
-                resultDiv.textContent = '⭕️ ピンポーン！';
-                resultDiv.className = 'correct';
+                // 正解
+                isAnswering = false;
+                feedback.textContent = '⭕️ せいかい！';
+                feedback.className = 'correct';
                 
-                // 正解の音声を鳴らしてから、2秒後に次の問題へ
-                speak('せいかい');
-                setTimeout(nextQuestion, 2000);
+                speak('せいかい！');
+                setTimeout(nextQuestion, 1800);
             } else {
-                resultDiv.textContent = '❌ ちがうよ';
-                resultDiv.className = 'incorrect';
+                // 不正解
+                feedback.textContent = '❌ もういちどきいてみてね';
+                feedback.className = 'incorrect';
                 
-                // もう一度問題の単語を読み上げる
-                setTimeout(() => speak(currentTarget.text), 500);
+                setTimeout(() => speak(currentTarget.text), 600);
             }
         }
     </script>
-
 </body>
 </html>
