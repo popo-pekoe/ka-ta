@@ -6,7 +6,7 @@
     <title>どっちかな？ おとあてゲーム</title>
     <style>
         body {
-            font-family: 'Hiragino Maru Gothic ProN', 'Rounded M+ 1c', sans-serif;
+            font-family: 'Hiragino Maru Gothic ProN', 'Rounded M+ 1c', 'Comic Sans MS', sans-serif;
             text-align: center;
             background-color: #fdfbf7;
             margin: 0;
@@ -14,69 +14,91 @@
             user-select: none;
             color: #333;
         }
+
+        /* 目立つタイトルデザイン */
         h1 {
-            color: #ff8c00;
-            font-size: 1.8rem;
-            margin: 5px 0 15px 0;
+            color: #ff6f00;
+            font-size: 2.4rem;
+            margin: 10px 0 20px 0;
+            text-shadow: 2px 2px 0px #ffe0b2, 4px 4px 0px #fff;
+            letter-spacing: 2px;
+        }
+
+        /* 目立つ特大スタートボタン */
+        .btn-start-main {
+            font-size: 1.6rem;
+            font-weight: bold;
+            padding: 18px 45px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 40px;
+            cursor: pointer;
+            box-shadow: 0 8px 0 #2e7d32, 0 12px 18px rgba(0,0,0,0.2);
+            transition: all 0.1s ease;
+            margin: 10px 0 25px 0;
+            display: inline-block;
+        }
+        .btn-start-main:hover {
+            background-color: #43a047;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 0 #2e7d32, 0 14px 20px rgba(0,0,0,0.25);
+        }
+        .btn-start-main:active {
+            transform: translateY(6px);
+            box-shadow: 0 2px 0 #2e7d32, 0 4px 6px rgba(0,0,0,0.2);
+        }
+
+        /* その他のボタン */
+        .btn-replay {
+            background-color: #ff9800;
+            color: white;
+            font-size: 1.3rem;
+            font-weight: bold;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        .btn-replay:active { transform: scale(0.96); }
+
+        .btn-reset {
+            background-color: #fff;
+            color: #888;
+            border: 2px solid #ddd;
+            font-size: 0.85rem;
+            padding: 6px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            box-shadow: none;
+            margin-top: 15px;
         }
 
         /* スターエリア */
         .stars-container {
             background-color: white;
-            border-radius: 16px;
-            padding: 15px 20px;
+            border: 3px solid #ffecb3;
+            border-radius: 20px;
+            padding: 15px 25px;
             display: inline-block;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.06);
-            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+            margin: 10px auto;
         }
         .stars-label {
-            font-size: 1rem;
+            font-size: 1.1rem;
             font-weight: bold;
-            color: #666;
-            margin-bottom: 8px;
+            color: #795548;
+            margin-bottom: 6px;
         }
         .star-icons {
-            font-size: 2rem;
-            letter-spacing: 4px;
+            font-size: 2.2rem;
+            letter-spacing: 5px;
         }
         .star-gold { color: #fbc02d; text-shadow: 0 2px 4px rgba(251, 192, 45, 0.4); }
         .star-gray { color: #e0e0e0; }
 
-        /* コントロール・ボタン */
-        .controls {
-            margin: 15px 0;
-            min-height: 50px;
-        }
-        button {
-            font-size: 1.2rem;
-            font-weight: bold;
-            padding: 12px 28px;
-            border: none;
-            border-radius: 30px;
-            cursor: pointer;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-            transition: transform 0.1s;
-        }
-        button:active { transform: scale(0.96); }
-        .btn-start { background-color: #4CAF50; color: white; }
-        .btn-replay { background-color: #ff9800; color: white; }
-        .btn-reset {
-            background-color: #fff;
-            color: #999;
-            border: 2px solid #ddd;
-            font-size: 0.85rem;
-            padding: 6px 14px;
-            box-shadow: none;
-            margin-top: 15px;
-        }
-
-        /* 問題画面 */
-        .progress-bar {
-            font-size: 1.1rem;
-            font-weight: bold;
-            color: #ff8c00;
-            margin-bottom: 10px;
-        }
+        /* 選択肢カード */
         .choices-container {
             display: flex;
             justify-content: center;
@@ -86,12 +108,14 @@
         .choice-card {
             background-color: white;
             border: 5px solid #eee;
-            border-radius: 20px;
-            width: 170px;
-            height: 170px;
+            border-radius: 24px;
+            width: 180px;
+            min-height: 210px;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
+            padding: 15px 10px;
             cursor: pointer;
             box-shadow: 0 6px 12px rgba(0,0,0,0.08);
             transition: transform 0.15s, border-color 0.15s;
@@ -107,14 +131,29 @@
             pointer-events: none;
         }
         .choice-card .emoji-icon {
-            font-size: 80px;
-            line-height: 1;
+            font-size: 85px;
+            line-height: 130px;
+            height: 130px;
+            pointer-events: none;
+        }
+        .choice-label {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #444;
+            margin-top: 8px;
+            letter-spacing: 2px;
             pointer-events: none;
         }
 
-        /* フィードバック */
+        /* 進行状況・フィードバック */
+        .progress-bar {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #ff8c00;
+            margin-bottom: 10px;
+        }
         #feedback {
-            font-size: 2rem;
+            font-size: 2.2rem;
             font-weight: bold;
             margin-top: 25px;
             height: 48px;
@@ -122,44 +161,82 @@
         .correct { color: #e91e63; }
         .incorrect { color: #2196f3; }
 
-        /* リザルトモーダル */
+        /* リザルト画面 */
         .result-box {
             background: white;
-            padding: 25px;
-            border-radius: 20px;
-            max-width: 360px;
+            padding: 30px;
+            border-radius: 24px;
+            max-width: 380px;
             margin: 20px auto;
             box-shadow: 0 8px 24px rgba(0,0,0,0.1);
         }
         .clear-banner {
-            font-size: 1.3rem;
+            font-size: 1.4rem;
             font-weight: bold;
             color: #e91e63;
             background: #ffebee;
-            padding: 10px;
-            border-radius: 10px;
+            padding: 12px;
+            border-radius: 12px;
             margin-bottom: 15px;
+        }
+
+        /* スコア表示のスタイル */
+        .score-list {
+            margin: 20px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: center;
+        }
+        .score-item {
+            font-size: 1.4rem;
+            color: #555;
+            font-weight: bold;
+        }
+        .score-item-correct span {
+            color: #e91e63;
+        }
+        .score-item-incorrect span {
+            color: #2196f3;
+        }
+        /* 一番目立たせる合計点（てんすう） */
+        .score-total {
+            font-size: 2.2rem;
+            color: #d84315;
+            background-color: #fff3e0;
+            border: 4px dashed #ff9800;
+            border-radius: 20px;
+            padding: 12px 24px;
+            margin-top: 8px;
+            box-shadow: 0 4px 10px rgba(255, 152, 0, 0.2);
+        }
+        .score-total span {
+            font-size: 2.8rem;
+            font-weight: 900;
+            color: #e65100;
+            margin-left: 4px;
         }
     </style>
 </head>
 <body>
 
-    <h1>どっちかな？ おとあてゲーム</h1>
-
-    <!-- 10スター表示エリア -->
-    <div class="stars-container">
-        <div class="stars-label">きょうのスター (<span id="starCountText">0</span> / 10)</div>
-        <div class="star-icons" id="starIconsArea"></div>
-    </div>
+    <h1>👂 どっちかな？ おとあてゲーム 🌟</h1>
 
     <!-- トップ画面コンテナ -->
     <div id="homeScreen">
         <div id="clearMessage" class="clear-banner" style="display: none;">
             🎉 たいへんよくできました！ きょうはクリア！
         </div>
-        <div class="controls">
-            <button class="btn-start" onclick="startRound()">▶️ 8もん チャレンジ！</button>
+
+        <div>
+            <button class="btn-start-main" onclick="startRound()">▶️ スタート！ (8もん)</button>
         </div>
+
+        <div class="stars-container">
+            <div class="stars-label">きょうのスター (<span id="starCountText">0</span> / 10)</div>
+            <div class="star-icons" id="starIconsArea"></div>
+        </div>
+
         <div>
             <button class="btn-reset" onclick="resetStarsManually()">🗑️ スターをリセット</button>
         </div>
@@ -168,27 +245,32 @@
     <!-- ゲームプレイ画面コンテナ -->
     <div id="gameScreen" style="display: none;">
         <div class="progress-bar" id="questionProgress">第 1 問 / 8 問</div>
-        <div class="controls">
+        <div>
             <button class="btn-replay" onclick="replayAudio()">🔊 もういちどきく</button>
         </div>
+        
         <div id="choices" class="choices-container"></div>
         <div id="feedback"></div>
     </div>
 
-    <!-- 8問終了画面コンテナ -->
+    <!-- 8問終了画面コンテナ（スコア表示） -->
     <div id="roundResultScreen" style="display: none;">
         <div class="result-box">
             <h2>チャレンジ おわり！</h2>
-            <p id="roundSummary" style="font-size: 1.2rem;"></p>
-            <p id="roundScoreDetail" style="font-weight: bold; color: #ff8c00; font-size: 1.3rem;"></p>
-            <button class="btn-start" onclick="backToHome()">おわる</button>
+
+            <div class="score-list">
+                <div class="score-item score-item-correct">せいかい ＝ <span id="resCorrect">0</span></div>
+                <div class="score-item score-item-incorrect">まちがい ＝ <span id="resIncorrect">0</span></div>
+                <div class="score-item score-total">てんすう ＝ <span id="resTotal">0</span></div>
+            </div>
+
+            <p id="roundScoreDetail" style="font-weight: bold; color: #ff8c00; font-size: 1.3rem; margin: 15px 0;"></p>
+            <button class="btn-start-main" style="padding: 12px 35px; font-size: 1.2rem;" onclick="backToHome()">おわる</button>
         </div>
     </div>
 
     <script>
-        // 全10ペア（画像対応 ＆ 絵文字対応）
         const wordPairs = [
-            // 画像ペア（ローカルのimgフォルダを使用）
             {
                 name: 'か・た',
                 ka: { id: 'ika',   text: 'いか', img: './img/ika.jpg' },
@@ -204,7 +286,6 @@
                 ka: { id: 'kutsu', text: 'くつ', img: './img/kutsu.jpg' },
                 ta: { id: 'tsutsu',text: 'つつ', img: './img/tsutsu.jpg' }
             },
-            // 絵文字アイコンペア（画像ファイル不要で即動作）
             {
                 name: 'か・た（しか・した）',
                 ka: { id: 'shika', text: 'しか', emoji: '🦌' },
@@ -254,7 +335,6 @@
         let currentTarget = null;
         let isAnswering = false;
 
-        // 起動時に保存データを確認（24時間経過チェック）
         window.onload = function() {
             check24HourReset();
             renderStars();
@@ -270,7 +350,6 @@
             renderStars();
         }
 
-        // 24時間リセット判定
         function check24HourReset() {
             const lastTime = parseInt(localStorage.getItem(STORAGE_KEY_TIME) || '0', 10);
             if (!lastTime) return;
@@ -283,7 +362,6 @@
             }
         }
 
-        // スター画面描画
         function renderStars() {
             const stars = getStoredStars();
             document.getElementById('starCountText').textContent = stars;
@@ -298,7 +376,6 @@
             }
             document.getElementById('starIconsArea').innerHTML = html;
 
-            // 10点達成バナー
             const clearBanner = document.getElementById('clearMessage');
             if (stars >= TARGET_STARS) {
                 clearBanner.style.display = 'block';
@@ -307,20 +384,17 @@
             }
         }
 
-        // 手動リセット
         function resetStarsManually() {
             if (confirm('スターを 0 にリセットしますか？')) {
                 setStoredStars(0);
             }
         }
 
-        // チャレンジ開始
         function startRound() {
             document.getElementById('homeScreen').style.display = 'none';
             document.getElementById('roundResultScreen').style.display = 'none';
             document.getElementById('gameScreen').style.display = 'block';
 
-            // 10組からランダムに8組を選んで問題リストを作成
             const shuffledPairs = [...wordPairs].sort(() => Math.random() - 0.5);
             currentRoundQuestions = shuffledPairs.slice(0, TOTAL_QUESTIONS_PER_ROUND);
 
@@ -339,10 +413,7 @@
 
             const pair = currentRoundQuestions[questionIndex];
 
-            // 正解音（カ行かタ行か）を決定
             currentTarget = Math.random() < 0.5 ? pair.ka : pair.ta;
-
-            // 左右ランダム配置
             const choices = Math.random() < 0.5 ? [pair.ka, pair.ta] : [pair.ta, pair.ka];
 
             const container = document.getElementById('choices');
@@ -352,7 +423,6 @@
                 const card = document.createElement('div');
                 card.className = 'choice-card';
 
-                // 画像か絵文字かで出し分け
                 if (item.img) {
                     const img = document.createElement('img');
                     img.src = item.img;
@@ -365,11 +435,15 @@
                     card.appendChild(span);
                 }
 
+                const label = document.createElement('div');
+                label.className = 'choice-label';
+                label.textContent = item.text;
+                card.appendChild(label);
+
                 card.onclick = () => handleChoice(item.id);
                 container.appendChild(card);
             });
 
-            // 音声再生
             speak(currentTarget.text);
         }
 
@@ -395,20 +469,17 @@
             const feedback = document.getElementById('feedback');
 
             if (selectedId === currentTarget.id) {
-                // 正解 (+1点)
                 roundCorrect++;
                 feedback.textContent = '⭕️ せいかい！ (+1)';
                 feedback.className = 'correct';
                 speak('せいかい！');
             } else {
-                // 不正解 (-1点)
                 roundIncorrect++;
                 feedback.textContent = '❌ ちがうよ (-1)';
                 feedback.className = 'incorrect';
                 speak('ざんねん！');
             }
 
-            // 1.2秒後に自動で次へ
             setTimeout(() => {
                 questionIndex++;
                 if (questionIndex < TOTAL_QUESTIONS_PER_ROUND) {
@@ -419,21 +490,22 @@
             }, 1200);
         }
 
-        // 8問終了時の集計
         function finishRound() {
             document.getElementById('gameScreen').style.display = 'none';
             document.getElementById('roundResultScreen').style.display = 'block';
 
-            // 正解 - 不正解 の純加算点
+            // 正解 - 不正解 の計算
             const roundScore = roundCorrect - roundIncorrect;
-            const netAdd = Math.max(0, roundScore); // マイナスの場合は加算0（スターは減らさない）
+            const netAdd = Math.max(0, roundScore);
 
             const currentStars = getStoredStars();
             const newStars = Math.min(TARGET_STARS, currentStars + netAdd);
             setStoredStars(newStars);
 
-            document.getElementById('roundSummary').textContent = 
-                `せいかい: ${roundCorrect} 問 ／ まちがい: ${roundIncorrect} 問`;
+            // スコア表示の更新
+            document.getElementById('resCorrect').textContent = roundCorrect;
+            document.getElementById('resIncorrect').textContent = roundIncorrect;
+            document.getElementById('resTotal').textContent = roundScore;
 
             if (netAdd > 0) {
                 document.getElementById('roundScoreDetail').textContent = `スター ＋${netAdd} 個 ゲット！`;
